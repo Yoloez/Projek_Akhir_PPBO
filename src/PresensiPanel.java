@@ -23,21 +23,6 @@ public class PresensiPanel extends JPanel {
         JLabel lblTitle = new JLabel("Daftar Presensi Mahasiswa - " + LocalDate.now().toString());
         lblTitle.setBounds(30, 10, 600, 30);
         Theme.applyLabelStyles(lblTitle);
-        // The error was likely here if you were using new Font() directly instead of Theme.FONT_LABEL
-        // For example, if you had: lblTitle.setFont(new Font("Arial", Font.BOLD, 16));
-        // Using Theme.applyLabelStyles which uses Theme.FONT_LABEL is correct.
-        // If Theme.FONT_LABEL was not used and Font was directly instantiated, the import is crucial.
-        // The provided code already uses Theme.applyLabelStyles for lblTitle,
-        // but the error indicates Font class was not found, meaning it was likely used directly somewhere
-        // or a component within Theme.java needs it and the PresensiPanel itself tried to use it.
-        // My previous response for PresensiPanel already uses applyLabelStyles, which is good.
-        // The explicit error points to PresensiPanel, so let's ensure direct Font usage here is covered.
-        // For instance, if there was a line like this (which wasn't in my generated code but might be in user's version):
-        // lblTitle.setFont(new Font("Arial", Font.BOLD, 16)); // This would need java.awt.Font
-        // My generated code for lblTitle in PresensiPanel correctly uses:
-        // Theme.applyLabelStyles(lblTitle);
-        // lblTitle.setFont(new Font("Arial", Font.BOLD, 16)); // This was in my generated code for PresensiPanel's lblTitle AFTER applyLabelStyles
-        // So, the import is indeed necessary.
         lblTitle.setFont(new Font("Arial", Font.BOLD, 16)); // This line was present and needs the import.
 
 
@@ -61,7 +46,7 @@ public class PresensiPanel extends JPanel {
         JButton btnChecklistAbsen = new JButton("Tandai Tidak Hadir");
         btnChecklistAbsen.setBounds(350, 350, 180, 35);
         Theme.applyButtonStyles(btnChecklistAbsen);
-        btnChecklistAbsen.setBackground(new Color(0xAA0000)); // A reddish color for Absen
+        btnChecklistAbsen.setBackground(new Color(0xFF4B4B)); // A reddish color for Absen
         add(btnChecklistAbsen);
 
 

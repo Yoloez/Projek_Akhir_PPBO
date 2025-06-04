@@ -1,20 +1,22 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.event.*;
-import java.util.ArrayList;
+// import java.awt.event.*; // Not strictly necessary if only using lambdas for ActionListeners
 import java.time.LocalDate;
+import java.util.ArrayList;
+
+// Removed: import static javax.swing.text.html.HTML.Tag.HEAD; // This was an incorrect import
 
 public class Dashboard extends JPanel {
     private JTextField tfNIM, tfNama, tfTanggal;
     private DefaultTableModel model;
-<<<<<<< HEAD
     private MainPanel mainPanel;
-    private ArrayList<String[]> dataMahasiswa;
+    private ArrayList<String[]> dataMahasiswa; // Reference to the shared list in MainPanel
 
     public Dashboard(MainPanel mainPanel, ArrayList<String[]> dataMahasiswa) {
         this.mainPanel = mainPanel;
         this.dataMahasiswa = dataMahasiswa; // Store the reference
 
+        // Assuming Theme class and its methods/constants are defined elsewhere
         setBackground(Theme.BACKGROUND_DARK);
         setLayout(null);
 
@@ -60,10 +62,10 @@ public class Dashboard extends JPanel {
         JButton btnLogout = new JButton("Logout");
         btnLogout.setBounds(550, 20, 100, 30);
         Theme.applyButtonStyles(btnLogout);
-        btnLogout.setBackground(Theme.BACKGROUND_LIGHT.brighter()); // Different color for logout
+        // Assuming Theme.BACKGROUND_LIGHT and Theme.FOREGROUND_LIGHT are defined
+        btnLogout.setBackground(Theme.BACKGROUND_LIGHT.brighter());
         btnLogout.setForeground(Theme.FOREGROUND_LIGHT);
         add(btnLogout);
-
 
         model = new DefaultTableModel(new String[]{"NIM", "Nama", "Tanggal Ditambahkan"}, 0){
             @Override
@@ -74,67 +76,20 @@ public class Dashboard extends JPanel {
         JTable table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(30, 210, 625, 220);
-        Theme.applyTableStyles(table, scrollPane);
+        Theme.applyTableStyles(table, scrollPane); // Assuming this method exists in Theme
         add(scrollPane);
 
         // Populate table with existing data if any (e.g. on panel switch)
         refreshDashboardTable();
 
-
-        // Di dalam Dashboard.java
-
-=======
-
-    public Dashboard(MainPanel mainPanel, ArrayList<String[]> dataMahasiswa) {
-        setLayout(null);
-
-        JLabel lblNIM = new JLabel("NIM:");
-        lblNIM.setBounds(30, 30, 80, 25);
-        add(lblNIM);
-        tfNIM = new JTextField();
-        tfNIM.setBounds(120, 30, 150, 25);
-        add(tfNIM);
-
-        JLabel lblNama = new JLabel("Nama:");
-        lblNama.setBounds(30, 60, 80, 25);
-        add(lblNama);
-        tfNama = new JTextField();
-        tfNama.setBounds(120, 60, 150, 25);
-        add(tfNama);
-
-        JLabel lblTanggal = new JLabel("Tanggal:");
-        lblTanggal.setBounds(30, 90, 80, 25);
-        add(lblTanggal);
-        tfTanggal = new JTextField(LocalDate.now().toString()); // otomatis isi tanggal hari ini
-        tfTanggal.setEditable(false); // tidak bisa diubah manual
-        tfTanggal.setBounds(120, 90, 150, 25);
-        add(tfTanggal);
-
-        JButton btnTambah = new JButton("Tambah");
-        btnTambah.setBounds(120, 130, 100, 30);
-        add(btnTambah);
-
-        JButton btnPresensi = new JButton("Halaman Presensi");
-        btnPresensi.setBounds(250, 130, 160, 30);
-        add(btnPresensi);
-
-        model = new DefaultTableModel(new String[]{"NIM", "Nama", "Tanggal"}, 0);
-        JTable table = new JTable(model);
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(30, 180, 600, 250);
-        add(scrollPane);
->>>>>>> 34f42c6b8a316ac835dbc1773b35adfd0e053968
-
         btnTambah.addActionListener(e -> {
-            String nim = tfNIM.getText();
-            String nama = tfNama.getText();
-            String tanggal = LocalDate.now().toString();
-
+            String nim = tfNIM.getText().trim(); // Added trim()
+            String nama = tfNama.getText().trim(); // Added trim()
+            String tanggal = LocalDate.now().toString(); // Date when student is added to dashboard
 
             if (!nim.isEmpty() && !nama.isEmpty()) {
-<<<<<<< HEAD
                 boolean nimExists = false;
-                for (String[] existingData : this.dataMahasiswa) { // this.dataMahasiswa adalah referensi ke list di MainPanel
+                for (String[] existingData : this.dataMahasiswa) { // this.dataMahasiswa is the reference to the list in MainPanel
                     if (existingData[0].equals(nim)) {
                         nimExists = true;
                         break;
@@ -144,43 +99,69 @@ public class Dashboard extends JPanel {
                 if (nimExists) {
                     JOptionPane.showMessageDialog(this, "NIM " + nim + " sudah terdaftar.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
+                    // The 4th element "Belum Hadir" is for presensi data, not directly shown in this dashboard table
                     String[] data = {nim, nama, tanggal, "Belum Hadir"};
                     this.dataMahasiswa.add(data); // Menambahkan ke list bersama
-                    model.addRow(new String[]{nim, nama, tanggal});
+                    model.addRow(new String[]{nim, nama, tanggal}); // Add to this panel's table model
                     tfNIM.setText("");
                     tfNama.setText("");
 
-                    // PENTING: Beritahu MainPanel untuk menyimpan perubahan ke CSV
-                    mainPanel.notifyDataMahasiswaChanged();
+                    // PENTING: Beritahu MainPanel untuk menyimpan perubahan (e.g., to CSV)
+                    if (mainPanel != null) { // Good practice to check for null
+                        mainPanel.notifyDataMahasiswaChanged();
+                    }
                 }
-=======
-                String[] data = {nim, nama, tanggal, "Belum Hadir"};
-                dataMahasiswa.add(data);
-                model.addRow(new String[]{nim, nama, tanggal});
-                tfNIM.setText(""); tfNama.setText("");
-                // tidak perlu set tanggal lagi karena akan diatur ulang otomatis
->>>>>>> 34f42c6b8a316ac835dbc1773b35adfd0e053968
             } else {
-                JOptionPane.showMessageDialog(this, "Semua field harus diisi.");
+                JOptionPane.showMessageDialog(this, "Semua field (NIM dan Nama) harus diisi.", "Input Error", JOptionPane.WARNING_MESSAGE);
             }
         });
 
-        btnPresensi.addActionListener(e -> mainPanel.showPage("presensi"));
-<<<<<<< HEAD
-        btnLogout.addActionListener(e -> mainPanel.showPage("login"));
+        btnPresensi.addActionListener(e -> {
+            if (mainPanel != null) {
+                mainPanel.showPage("presensi");
+            }
+        });
+
+        btnLogout.addActionListener(e -> {
+            if (mainPanel != null) {
+                mainPanel.showPage("login");
+            }
+        });
     }
 
     // Method to refresh the table view, e.g., when returning to this dashboard
     public void refreshDashboardTable() {
+        if (model == null || dataMahasiswa == null) return; // Defensive check
+
         model.setRowCount(0); // Clear existing rows in the model
-        tfTanggal.setText(LocalDate.now().toString()); // Update date on refresh
+        tfTanggal.setText(LocalDate.now().toString()); // Update date field on refresh
+
         for (String[] data : dataMahasiswa) {
             // Dashboard table only shows NIM, Nama, Tanggal (when added)
-            model.addRow(new String[]{data[0], data[1], data[2]});
+            // Assuming data array always has at least 3 elements if it's valid
+            if (data.length >= 3) {
+                model.addRow(new String[]{data[0], data[1], data[2]});
+            }
         }
     }
 }
-=======
-    }
-}
->>>>>>> 34f42c6b8a316ac835dbc1773b35adfd0e053968
+
+// Placeholder for Theme class - You need to have this defined elsewhere
+// class Theme {
+// public static final java.awt.Color BACKGROUND_DARK = new java.awt.Color(60, 63, 65);
+// public static final java.awt.Color TEXT_FIELD_BACKGROUND = new java.awt.Color(75,78,80);
+// public static final java.awt.Color BACKGROUND_LIGHT = new java.awt.Color(100,103,105);
+// public static final java.awt.Color FOREGROUND_LIGHT = java.awt.Color.WHITE;
+
+// public static void applyLabelStyles(JLabel label) {/*...styling...*/}
+// public static void applyTextFieldStyles(JTextField textField) {/*...styling...*/}
+// public static void applyButtonStyles(JButton button) {/*...styling...*/}
+// public static void applyTableStyles(JTable table, JScrollPane scrollPane) {/*...styling...*/}
+//}
+
+// Placeholder for MainPanel class - You need to have this defined elsewhere
+// class MainPanel extends JPanel {
+// public void showPage(String pageName) {/*...logic to switch panels...*/}
+// public void notifyDataMahasiswaChanged() {/*...logic to save data or update other components...*/}
+// // It would also manage the ArrayList<String[]> dataMahasiswa
+//}

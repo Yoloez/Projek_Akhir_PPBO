@@ -49,6 +49,11 @@ public class LoginPanel extends JPanel {
         Theme.applyButtonStyles(btnGoToRegister);
         add(btnGoToRegister);
 
+        JButton btnGoToStudentView = new JButton("Cek Kehadiran (Mahasiswa)");
+        btnGoToStudentView.setBounds(centerX - 125, 330, 250, 35); // Sesuaikan posisi jika perlu
+        Theme.applyButtonStyles(btnGoToStudentView); // Menerapkan gaya ke tombol
+        add(btnGoToStudentView);
+
         btnLogin.addActionListener(e -> {
             String user = tfUser.getText();
             String pass = new String(tfPass.getPassword());
@@ -61,5 +66,14 @@ public class LoginPanel extends JPanel {
         });
 
         btnGoToRegister.addActionListener(e -> mainPanel.showPage("register"));
+
+        btnGoToStudentView.addActionListener(e -> {
+            if (mainPanel != null) {
+                mainPanel.showPage("studentView");
+            } else {
+                // Tambahkan ini untuk debugging jika mainPanel null
+                System.err.println("Error: mainPanel is null di LoginPanel saat mencoba ke studentView.");
+            }
+        });
     }
 }

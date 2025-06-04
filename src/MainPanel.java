@@ -14,6 +14,7 @@ public class MainPanel extends JPanel {
     private RegisterPanel registerPanel;
     private Dashboard dashboardPanel;
     private PresensiPanel presensiPanel;
+    private StudentViewPanel studentViewPanel;
 
     // Nama file CSV untuk menyimpan data mahasiswa
     private static final String DATA_MAHASISWA_CSV_FILE = "datamahasiswa.csv";
@@ -33,11 +34,13 @@ public class MainPanel extends JPanel {
         // Pastikan dataMahasiswa yang sudah di-load dari CSV diteruskan ke Dashboard dan PresensiPanel
         dashboardPanel = new Dashboard(this, dataMahasiswa);
         presensiPanel = new PresensiPanel(this, dataMahasiswa);
+        studentViewPanel = new StudentViewPanel(this, dataMahasiswa);
 
         add(loginPanel, "login");
         add(registerPanel, "register");
         add(dashboardPanel, "dashboard");
         add(presensiPanel, "presensi");
+        add(studentViewPanel, "studentView");
 
         cardLayout.show(this, "login");
     }
@@ -47,6 +50,8 @@ public class MainPanel extends JPanel {
             presensiPanel.refreshTable();
         } else if (name.equals("dashboard")) {
             dashboardPanel.refreshDashboardTable();
+        } else if (name.equals("studentView")) { // <-- Tambahkan kondisi untuk studentView
+            studentViewPanel.refreshView();
         }
         cardLayout.show(this, name);
     }
