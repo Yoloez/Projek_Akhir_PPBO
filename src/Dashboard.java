@@ -7,6 +7,7 @@ import java.time.LocalDate;
 public class Dashboard extends JPanel {
     private JTextField tfNIM, tfNama, tfTanggal;
     private DefaultTableModel model;
+<<<<<<< HEAD
     private MainPanel mainPanel;
     private ArrayList<String[]> dataMahasiswa;
 
@@ -82,13 +83,56 @@ public class Dashboard extends JPanel {
 
         // Di dalam Dashboard.java
 
+=======
+
+    public Dashboard(MainPanel mainPanel, ArrayList<String[]> dataMahasiswa) {
+        setLayout(null);
+
+        JLabel lblNIM = new JLabel("NIM:");
+        lblNIM.setBounds(30, 30, 80, 25);
+        add(lblNIM);
+        tfNIM = new JTextField();
+        tfNIM.setBounds(120, 30, 150, 25);
+        add(tfNIM);
+
+        JLabel lblNama = new JLabel("Nama:");
+        lblNama.setBounds(30, 60, 80, 25);
+        add(lblNama);
+        tfNama = new JTextField();
+        tfNama.setBounds(120, 60, 150, 25);
+        add(tfNama);
+
+        JLabel lblTanggal = new JLabel("Tanggal:");
+        lblTanggal.setBounds(30, 90, 80, 25);
+        add(lblTanggal);
+        tfTanggal = new JTextField(LocalDate.now().toString()); // otomatis isi tanggal hari ini
+        tfTanggal.setEditable(false); // tidak bisa diubah manual
+        tfTanggal.setBounds(120, 90, 150, 25);
+        add(tfTanggal);
+
+        JButton btnTambah = new JButton("Tambah");
+        btnTambah.setBounds(120, 130, 100, 30);
+        add(btnTambah);
+
+        JButton btnPresensi = new JButton("Halaman Presensi");
+        btnPresensi.setBounds(250, 130, 160, 30);
+        add(btnPresensi);
+
+        model = new DefaultTableModel(new String[]{"NIM", "Nama", "Tanggal"}, 0);
+        JTable table = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBounds(30, 180, 600, 250);
+        add(scrollPane);
+>>>>>>> 34f42c6b8a316ac835dbc1773b35adfd0e053968
 
         btnTambah.addActionListener(e -> {
             String nim = tfNIM.getText();
             String nama = tfNama.getText();
             String tanggal = LocalDate.now().toString();
 
+
             if (!nim.isEmpty() && !nama.isEmpty()) {
+<<<<<<< HEAD
                 boolean nimExists = false;
                 for (String[] existingData : this.dataMahasiswa) { // this.dataMahasiswa adalah referensi ke list di MainPanel
                     if (existingData[0].equals(nim)) {
@@ -109,12 +153,20 @@ public class Dashboard extends JPanel {
                     // PENTING: Beritahu MainPanel untuk menyimpan perubahan ke CSV
                     mainPanel.notifyDataMahasiswaChanged();
                 }
+=======
+                String[] data = {nim, nama, tanggal, "Belum Hadir"};
+                dataMahasiswa.add(data);
+                model.addRow(new String[]{nim, nama, tanggal});
+                tfNIM.setText(""); tfNama.setText("");
+                // tidak perlu set tanggal lagi karena akan diatur ulang otomatis
+>>>>>>> 34f42c6b8a316ac835dbc1773b35adfd0e053968
             } else {
-                JOptionPane.showMessageDialog(this, "NIM dan Nama harus diisi.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Semua field harus diisi.");
             }
         });
 
         btnPresensi.addActionListener(e -> mainPanel.showPage("presensi"));
+<<<<<<< HEAD
         btnLogout.addActionListener(e -> mainPanel.showPage("login"));
     }
 
@@ -128,3 +180,7 @@ public class Dashboard extends JPanel {
         }
     }
 }
+=======
+    }
+}
+>>>>>>> 34f42c6b8a316ac835dbc1773b35adfd0e053968
