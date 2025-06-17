@@ -1,4 +1,3 @@
-// Di dalam MainApp.java
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -8,7 +7,7 @@ public class MainApp {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Aplikasi Presensi Mahasiswa");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(700, 550); // MODIFIKASI: Sedikit lebih tinggi untuk UI baru
+            frame.setSize(700, 550); // Ukuran bisa disesuaikan lagi jika perlu
             frame.setLocationRelativeTo(null);
             frame.setResizable(false);
 
@@ -19,9 +18,11 @@ public class MainApp {
                 @Override
                 public void windowClosing(WindowEvent e) {
                     System.out.println("Menyimpan semua data sebelum keluar...");
-                    // MODIFIKASI: Simpan kedua file
                     mainPanel.saveDataMahasiswaToCSV();
                     mainPanel.saveDataPresensiToCSV();
+                    mainPanel.saveDataLaporanToCSV();
+                    // BARU: Panggil save untuk data pengguna
+                    mainPanel.saveUsersToCSV();
                 }
             });
 

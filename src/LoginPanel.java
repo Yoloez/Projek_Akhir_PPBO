@@ -12,7 +12,7 @@ public class LoginPanel extends JPanel {
         setBackground(Theme.BACKGROUND_DARK);
         setLayout(null);
 
-        int centerX = 700 / 2; // Assuming frame width is 700
+        int centerX = 700 / 2;
 
         JLabel lblTitle = new JLabel("Student Attendance Login");
         lblTitle.setBounds(centerX - 150, 100, 300, 30);
@@ -25,7 +25,7 @@ public class LoginPanel extends JPanel {
         lblUser.setBounds(centerX - 150, 150, 80, 25);
         Theme.applyLabelStyles(lblUser);
         add(lblUser);
-        tfUser = new JTextField("admin"); // Default for convenience
+        tfUser = new JTextField(); // Default dihilangkan agar bersih
         tfUser.setBounds(centerX - 70, 150, 200, 30);
         Theme.applyTextFieldStyles(tfUser);
         add(tfUser);
@@ -34,46 +34,72 @@ public class LoginPanel extends JPanel {
         lblPass.setBounds(centerX - 150, 190, 80, 25);
         Theme.applyLabelStyles(lblPass);
         add(lblPass);
-        tfPass = new JPasswordField("123"); // Default for convenience
+        tfPass = new JPasswordField(); // Default dihilangkan agar bersih
         tfPass.setBounds(centerX - 70, 190, 200, 30);
         Theme.applyPasswordFieldStyles(tfPass);
         add(tfPass);
 
+        // Posisikan tombol di tengah
         JButton btnLogin = new JButton("Login");
         btnLogin.setBounds(centerX - 100, 240, 200, 35);
         Theme.applyButtonStyles(btnLogin);
         add(btnLogin);
 
-        JButton btnGoToRegister = new JButton("Create Account");
+        JButton btnGoToRegister = new JButton("Create Student Account");
         btnGoToRegister.setBounds(centerX - 100, 285, 200, 35);
         Theme.applyButtonStyles(btnGoToRegister);
         add(btnGoToRegister);
 
-        JButton btnGoToStudentView = new JButton("Cek Kehadiran (Mahasiswa)");
-        btnGoToStudentView.setBounds(centerX - 125, 330, 250, 35); // Sesuaikan posisi jika perlu
-        Theme.applyButtonStyles(btnGoToStudentView); // Menerapkan gaya ke tombol
-        add(btnGoToStudentView);
+        // --- PERUBAHAN: Tombol "Cek Kehadiran (Tanpa Login)" dihilangkan ---
+        // JButton btnGoToStudentView = new JButton("Cek Kehadiran (Tanpa Login)");
+        // ... baris-baris terkait tombol ini dihapus ...
 
+        // Action Listener untuk Login dengan pengalihan berbasis peran
         btnLogin.addActionListener(e -> {
-            String user = tfUser.getText();
+            String user = tfUser.getText().trim();
             String pass = new String(tfPass.getPassword());
 
-            if (mainPanel.authenticateUser(user, pass)) {
-                mainPanel.showPage("dashboard");
+            if (user.isEmpty() || pass.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Username dan Password harus diisi.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Panggil metode autentikasi yang mengembalikan objek User
+            User loggedInUser = mainPanel.authenticateUser(user, pass);
+
+            if (loggedInUser != null) {
+                // Autentikasi berhasil, cek peran (role)
+                String role = loggedInUser.getRole();
+
+                if ("admin".equals(role)) {
+                    // Jika admin, arahkan ke dashboard
+                    mainPanel.showPage("dashboard");
+                } else if ("mahasiswa".equals(role)) {
+                    // Jika mahasiswa, ambil NIM-nya
+                    String nim = loggedInUser.getNim();
+                    if (nim != null) {
+                        // Tampilkan data mahasiswa di StudentViewPanel
+                        mainPanel.getStudentViewPanel().showStudentData(nim);
+                        // Arahkan ke halaman mahasiswa
+                        mainPanel.showPage("studentView");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Error: Akun mahasiswa tidak memiliki NIM.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Peran pengguna tidak dikenal.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+                // Kosongkan field setelah login berhasil atau gagal
+                tfUser.setText("");
+                tfPass.setText("");
+
             } else {
-                JOptionPane.showMessageDialog(this, "Login failed! Invalid username or password.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                // Autentikasi gagal
+                JOptionPane.showMessageDialog(this, "Login gagal! Username atau password salah.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                tfPass.setText(""); // Hanya kosongkan password
             }
         });
 
         btnGoToRegister.addActionListener(e -> mainPanel.showPage("register"));
-
-        btnGoToStudentView.addActionListener(e -> {
-            if (mainPanel != null) {
-                mainPanel.showPage("studentView");
-            } else {
-                // Tambahkan ini untuk debugging jika mainPanel null
-                System.err.println("Error: mainPanel is null di LoginPanel saat mencoba ke studentView.");
-            }
-        });
     }
 }

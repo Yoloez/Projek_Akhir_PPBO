@@ -1,4 +1,3 @@
-// StudentViewPanel.java
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
@@ -11,13 +10,15 @@ public class StudentViewPanel extends JPanel {
     private ArrayList<String[]> dataSemuaMahasiswa;
     private ArrayList<String[]> dataPresensi;
 
-    // --- MODIFIKASI: Tambahkan komponen UI sebagai field ---
-    private JTextField tfNIMEntry;
+    // Komponen UI
+    private JTextField tfNIMEntry; // Tetap ada tapi disembunyikan, untuk menyimpan NIM internal
     private JButton btnCheckAttendance;
+    private JLabel lblNIMPrompt;
     private JLabel lblStudentNameResult, lblStudentNIMResult, lblRegistrationDateResult, lblAttendanceStatusResult, lblStatusDateInfo;
     private JLabel lblInfoMessage;
+    private JButton btnLaporkan;
+    private JButton btnBackToLogin;
 
-    // BARU: Komponen untuk memilih tanggal
     private LocalDate tanggalYangDipilih;
     private JTextField tfTanggalDisplay;
     private JButton btnPilihTanggal;
@@ -26,15 +27,15 @@ public class StudentViewPanel extends JPanel {
         this.mainPanel = mainPanel;
         this.dataSemuaMahasiswa = dataSemuaMahasiswa;
         this.dataPresensi = dataPresensi;
-        this.tanggalYangDipilih = LocalDate.now(); // Default ke hari ini
+        this.tanggalYangDipilih = LocalDate.now();
 
         setBackground(Theme.BACKGROUND_DARK);
         setLayout(null);
 
         int centerX = 700 / 2;
-        int currentY = 30; // Posisi Y awal
+        int currentY = 30;
 
-        JLabel lblTitle = new JLabel("Cek Status Kehadiran Anda");
+        JLabel lblTitle = new JLabel("Status Kehadiran Anda"); // Judul lebih personal
         lblTitle.setBounds(centerX - 200, currentY, 400, 30);
         lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
         Theme.applyLabelStyles(lblTitle);
@@ -42,18 +43,28 @@ public class StudentViewPanel extends JPanel {
         add(lblTitle);
         currentY += 50;
 
-        // Input NIM
-        JLabel lblNIMPrompt = new JLabel("Masukkan NIM Anda:");
+        // PERBAIKAN: Komponen input NIM disembunyikan karena data didapat otomatis
+        lblNIMPrompt = new JLabel("Masukkan NIM Anda:");
         lblNIMPrompt.setBounds(centerX - 220, currentY, 150, 25);
         Theme.applyLabelStyles(lblNIMPrompt);
+        lblNIMPrompt.setVisible(false); // Sembunyikan
         add(lblNIMPrompt);
+
         tfNIMEntry = new JTextField();
         tfNIMEntry.setBounds(centerX - 60, currentY, 240, 30);
         Theme.applyTextFieldStyles(tfNIMEntry);
+        tfNIMEntry.setVisible(false); // Sembunyikan
         add(tfNIMEntry);
-        currentY += 40;
 
-        // --- BARU: UI Pilih Tanggal ---
+        // Tombol Cek disembunyikan
+        btnCheckAttendance = new JButton("Cek Kehadiran");
+        btnCheckAttendance.setBounds(centerX - 100, currentY, 200, 35);
+        Theme.applyButtonStyles(btnCheckAttendance);
+        btnCheckAttendance.setVisible(false); // Sembunyikan
+        add(btnCheckAttendance);
+        // Posisi Y tidak perlu ditambah karena komponen disembunyikan
+
+        // UI Pilih Tanggal (tetap ada)
         JLabel lblTanggalPrompt = new JLabel("Pilih Tanggal Cek:");
         lblTanggalPrompt.setBounds(centerX - 220, currentY, 150, 25);
         Theme.applyLabelStyles(lblTanggalPrompt);
@@ -72,14 +83,6 @@ public class StudentViewPanel extends JPanel {
         add(btnPilihTanggal);
         currentY += 45;
 
-        // Tombol Cek
-        btnCheckAttendance = new JButton("Cek Kehadiran");
-        btnCheckAttendance.setBounds(centerX - 100, currentY, 200, 35);
-        Theme.applyButtonStyles(btnCheckAttendance);
-        add(btnCheckAttendance);
-        currentY += 50;
-
-
         // Area untuk menampilkan hasil pencarian
         int labelWidth = 180;
         int valueWidth = 250;
@@ -87,6 +90,7 @@ public class StudentViewPanel extends JPanel {
         int xPosLabel = centerX - 220;
         int xPosValue = centerX - 30;
 
+        // ... (semua JLabel untuk hasil pencarian tetap sama)
         JLabel lblDisplayNIM = new JLabel("NIM:");
         lblDisplayNIM.setBounds(xPosLabel, currentY, labelWidth, fieldHeight);
         Theme.applyLabelStyles(lblDisplayNIM);
@@ -96,7 +100,6 @@ public class StudentViewPanel extends JPanel {
         Theme.applyLabelStyles(lblStudentNIMResult);
         add(lblStudentNIMResult);
         currentY += fieldHeight + 5;
-
         JLabel lblDisplayName = new JLabel("Nama:");
         lblDisplayName.setBounds(xPosLabel, currentY, labelWidth, fieldHeight);
         Theme.applyLabelStyles(lblDisplayName);
@@ -106,7 +109,6 @@ public class StudentViewPanel extends JPanel {
         Theme.applyLabelStyles(lblStudentNameResult);
         add(lblStudentNameResult);
         currentY += fieldHeight + 5;
-
         JLabel lblDisplayRegDate = new JLabel("Tanggal Terdaftar:");
         lblDisplayRegDate.setBounds(xPosLabel, currentY, labelWidth, fieldHeight);
         Theme.applyLabelStyles(lblDisplayRegDate);
@@ -116,8 +118,6 @@ public class StudentViewPanel extends JPanel {
         Theme.applyLabelStyles(lblRegistrationDateResult);
         add(lblRegistrationDateResult);
         currentY += fieldHeight + 5;
-
-        // MODIFIKASI: Label lebih generik
         JLabel lblDisplayStatus = new JLabel("Status Kehadiran:");
         lblDisplayStatus.setBounds(xPosLabel, currentY, labelWidth, fieldHeight);
         Theme.applyLabelStyles(lblDisplayStatus);
@@ -127,14 +127,12 @@ public class StudentViewPanel extends JPanel {
         Theme.applyLabelStyles(lblAttendanceStatusResult);
         lblAttendanceStatusResult.setFont(new Font("Arial", Font.BOLD, 16));
         add(lblAttendanceStatusResult);
-
         lblStatusDateInfo = new JLabel("(Untuk tanggal: " + LocalDate.now().toString() + ")");
         lblStatusDateInfo.setBounds(xPosLabel, currentY + fieldHeight, 300, fieldHeight);
         Theme.applyLabelStyles(lblStatusDateInfo);
         lblStatusDateInfo.setFont(new Font("Arial", Font.ITALIC, 12));
         add(lblStatusDateInfo);
         currentY += (fieldHeight * 2) + 10;
-
         lblInfoMessage = new JLabel(" ");
         lblInfoMessage.setBounds(centerX - 200, currentY, 400, 25);
         lblInfoMessage.setHorizontalAlignment(SwingConstants.CENTER);
@@ -142,8 +140,14 @@ public class StudentViewPanel extends JPanel {
         add(lblInfoMessage);
         currentY += 40;
 
-        JButton btnBackToLogin = new JButton("Kembali ke Login");
-        btnBackToLogin.setBounds(centerX - 100, currentY, 200, 35);
+        btnLaporkan = new JButton("Laporkan Ketidaksesuaian");
+        Theme.applyButtonStyles(btnLaporkan);
+        btnLaporkan.setBackground(new Color(0xFFC107));
+        btnLaporkan.setBounds(centerX - 125, currentY, 250, 35);
+        add(btnLaporkan);
+
+        btnBackToLogin = new JButton("Kembali ke Halaman Login");
+        btnBackToLogin.setBounds(centerX - 125, currentY + 45, 250, 35);
         Theme.applyButtonStyles(btnBackToLogin);
         add(btnBackToLogin);
 
@@ -157,20 +161,44 @@ public class StudentViewPanel extends JPanel {
             if (selectedDateStr != null && !selectedDateStr.isEmpty()) {
                 this.tanggalYangDipilih = LocalDate.parse(selectedDateStr);
                 tfTanggalDisplay.setText(selectedDateStr);
+                // Setelah memilih tanggal, langsung cek kehadiran untuk NIM yang sudah tersimpan
+                checkStudentAttendance();
             }
         });
 
-        btnCheckAttendance.addActionListener(e -> checkStudentAttendance());
+        // Listener untuk btnCheckAttendance bisa dihapus karena tombolnya disembunyikan
         btnBackToLogin.addActionListener(e -> mainPanel.showPage("login"));
+
+        btnLaporkan.addActionListener(e -> {
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            String nim = lblStudentNIMResult.getText();
+            String nama = lblStudentNameResult.getText();
+            String tanggalDikeluhkan = tanggalYangDipilih.toString();
+
+            LaporPanel laporPanel = new LaporPanel(parentFrame, mainPanel, nim, nama, tanggalDikeluhkan);
+            laporPanel.setVisible(true);
+        });
 
         clearStudentInfoDisplay();
     }
 
-    // MODIFIKASI: Logika pengecekan menggunakan tanggal yang dipilih
+    /**
+     * BARU: Metode ini dipanggil oleh MainPanel setelah registrasi berhasil.
+     * Ini akan mengisi panel dengan data mahasiswa yang sesuai secara otomatis.
+     */
+    public void showStudentData(String nim) {
+        // Simpan NIM di textfield yang tersembunyi
+        tfNIMEntry.setText(nim);
+        // Langsung panggil checkStudentAttendance untuk menampilkan data
+        checkStudentAttendance();
+    }
+
     private void checkStudentAttendance() {
+        // Ambil NIM dari textfield internal, bukan dari input manual
         String nimToFind = tfNIMEntry.getText().trim();
         if (nimToFind.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Silakan masukkan NIM Anda.", "Input Diperlukan", JOptionPane.WARNING_MESSAGE);
+            // Ini seharusnya tidak terjadi di alur baru, tapi sebagai pengaman
+            lblInfoMessage.setText("Tidak ada data mahasiswa untuk ditampilkan.");
             return;
         }
 
@@ -184,31 +212,29 @@ public class StudentViewPanel extends JPanel {
             lblStudentNameResult.setText(studentData[1]);
             lblRegistrationDateResult.setText(studentData[2]);
 
-            // Gunakan tanggalYangDipilih untuk mencari status
             String dateString = this.tanggalYangDipilih.format(DateTimeFormatter.ISO_LOCAL_DATE);
             Optional<String[]> presensiOpt = dataPresensi.stream()
                     .filter(p -> p[0].equals(nimToFind) && p[1].equals(dateString))
                     .findFirst();
 
-            String status = presensiOpt.map(p -> p[2]).orElse("Belum Ada Data");
-            lblAttendanceStatusResult.setText(status);
+            String newStatus = presensiOpt.map(p -> p[2]).orElse("Belum Ada Data");
+            lblAttendanceStatusResult.setText(newStatus);
 
-            if ("Hadir".equalsIgnoreCase(status)) {
+            if ("Hadir".equalsIgnoreCase(newStatus)) {
                 lblAttendanceStatusResult.setForeground(new Color(0x28A745));
             } else {
                 lblAttendanceStatusResult.setForeground(new Color(0xDC3545));
             }
 
-            lblInfoMessage.setText("Data ditemukan.");
-            lblInfoMessage.setForeground(new Color(0x28A745));
+            lblInfoMessage.setText("Selamat datang! Pilih tanggal untuk melihat riwayat.");
+            lblInfoMessage.setForeground(Theme.ACCENT_BLUE);
+            btnLaporkan.setVisible(true);
         } else {
             clearStudentInfoDisplay();
-            lblInfoMessage.setText("NIM " + nimToFind + " tidak ditemukan.");
+            lblInfoMessage.setText("Data untuk NIM " + nimToFind + " tidak ditemukan.");
             lblInfoMessage.setForeground(Color.RED);
-            JOptionPane.showMessageDialog(this, "NIM " + nimToFind + " tidak ditemukan.", "Pencarian Gagal", JOptionPane.ERROR_MESSAGE);
         }
 
-        // Update label info dengan tanggal yang dicek
         lblStatusDateInfo.setText("(Untuk tanggal: " + this.tanggalYangDipilih.toString() + ")");
     }
 
@@ -218,14 +244,16 @@ public class StudentViewPanel extends JPanel {
         lblRegistrationDateResult.setText("-");
         lblAttendanceStatusResult.setText("-");
         lblAttendanceStatusResult.setForeground(Theme.FOREGROUND_LIGHT);
-        lblInfoMessage.setText("Masukkan NIM, pilih tanggal, lalu klik Cek Kehadiran.");
+        lblInfoMessage.setText("Selamat datang di halaman kehadiran.");
         lblInfoMessage.setForeground(Theme.ACCENT_BLUE);
+
+        if (btnLaporkan != null) {
+            btnLaporkan.setVisible(false);
+        }
     }
 
-    // Metode ini dipanggil saat panel ini ditampilkan
     public void refreshView() {
         tfNIMEntry.setText("");
-        // Reset tanggal ke hari ini
         this.tanggalYangDipilih = LocalDate.now();
         this.tfTanggalDisplay.setText(this.tanggalYangDipilih.toString());
         clearStudentInfoDisplay();

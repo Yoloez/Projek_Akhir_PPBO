@@ -4,59 +4,92 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class RegisterPanel extends JPanel {
+    // BARU: Tambahkan field untuk NIM dan Nama
+    private JTextField tfNIM;
+    private JTextField tfNama;
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private JPasswordField pfConfirmPassword;
-    private MainPanel mainPanel; // Reference to MainPanel to call registration logic and switch pages
+    private MainPanel mainPanel;
 
     public RegisterPanel(MainPanel mainPanel) {
         this.mainPanel = mainPanel;
         setBackground(Theme.BACKGROUND_DARK);
-        setLayout(null); // Using null layout as per existing structure
+        setLayout(null);
 
-        int centerX = 700 / 2; // Assuming frame width is 700
+        int centerX = 700 / 2;
+        int currentY = 80; // Sesuaikan posisi awal
 
-        JLabel lblTitle = new JLabel("Create Account");
-        lblTitle.setBounds(centerX - 75, 100, 150, 30);
+        JLabel lblTitle = new JLabel("Registrasi Akun Mahasiswa");
+        lblTitle.setBounds(centerX - 150, currentY, 300, 30);
         lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
         Theme.applyLabelStyles(lblTitle);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 20)); // Larger title
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
         add(lblTitle);
+        currentY += 50;
 
+        // --- BARU: Input untuk NIM ---
+        JLabel lblNIM = new JLabel("NIM:");
+        lblNIM.setBounds(centerX - 150, currentY, 100, 25);
+        Theme.applyLabelStyles(lblNIM);
+        add(lblNIM);
+        tfNIM = new JTextField();
+        tfNIM.setBounds(centerX - 50, currentY, 200, 30);
+        Theme.applyTextFieldStyles(tfNIM);
+        add(tfNIM);
+        currentY += 40;
+
+        // --- BARU: Input untuk Nama ---
+        JLabel lblNama = new JLabel("Nama Lengkap:");
+        lblNama.setBounds(centerX - 150, currentY, 100, 25);
+        Theme.applyLabelStyles(lblNama);
+        add(lblNama);
+        tfNama = new JTextField();
+        tfNama.setBounds(centerX - 50, currentY, 200, 30);
+        Theme.applyTextFieldStyles(tfNama);
+        add(tfNama);
+        currentY += 40;
+
+        // --- Input untuk Akun ---
         JLabel lblUser = new JLabel("Username:");
-        lblUser.setBounds(centerX - 150, 150, 80, 25);
+        lblUser.setBounds(centerX - 150, currentY, 100, 25);
         Theme.applyLabelStyles(lblUser);
         add(lblUser);
         tfUsername = new JTextField();
-        tfUsername.setBounds(centerX - 70, 150, 200, 30);
+        tfUsername.setBounds(centerX - 50, currentY, 200, 30);
         Theme.applyTextFieldStyles(tfUsername);
         add(tfUsername);
+        currentY += 40;
 
         JLabel lblPass = new JLabel("Password:");
-        lblPass.setBounds(centerX - 150, 190, 80, 25);
+        lblPass.setBounds(centerX - 150, currentY, 100, 25);
         Theme.applyLabelStyles(lblPass);
         add(lblPass);
         pfPassword = new JPasswordField();
-        pfPassword.setBounds(centerX - 70, 190, 200, 30);
+        pfPassword.setBounds(centerX - 50, currentY, 200, 30);
         Theme.applyPasswordFieldStyles(pfPassword);
         add(pfPassword);
+        currentY += 40;
 
         JLabel lblConfirmPass = new JLabel("Confirm PW:");
-        lblConfirmPass.setBounds(centerX - 150, 230, 80, 25);
+        lblConfirmPass.setBounds(centerX - 150, currentY, 100, 25);
         Theme.applyLabelStyles(lblConfirmPass);
         add(lblConfirmPass);
         pfConfirmPassword = new JPasswordField();
-        pfConfirmPassword.setBounds(centerX - 70, 230, 200, 30);
+        pfConfirmPassword.setBounds(centerX - 50, currentY, 200, 30);
         Theme.applyPasswordFieldStyles(pfConfirmPassword);
         add(pfConfirmPassword);
+        currentY += 50;
 
+        // Tombol
         JButton btnRegister = new JButton("Register");
-        btnRegister.setBounds(centerX - 100, 280, 200, 35);
+        btnRegister.setBounds(centerX - 100, currentY, 200, 35);
         Theme.applyButtonStyles(btnRegister);
         add(btnRegister);
+        currentY += 45;
 
         JButton btnBackToLogin = new JButton("Back to Login");
-        btnBackToLogin.setBounds(centerX - 100, 325, 200, 35);
+        btnBackToLogin.setBounds(centerX - 100, currentY, 200, 35);
         Theme.applyButtonStyles(btnBackToLogin);
         add(btnBackToLogin);
 
@@ -64,38 +97,38 @@ public class RegisterPanel extends JPanel {
         btnRegister.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = tfUsername.getText();
+                // MODIFIKASI: Ambil data NIM dan Nama
+                String nim = tfNIM.getText().trim();
+                String nama = tfNama.getText().trim();
+                String username = tfUsername.getText().trim();
                 String password = new String(pfPassword.getPassword());
                 String confirmPassword = new String(pfConfirmPassword.getPassword());
 
-                if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                    JOptionPane.showMessageDialog(RegisterPanel.this,
-                            "All fields must be filled.",
-                            "Registration Error", JOptionPane.ERROR_MESSAGE);
+                // MODIFIKASI: Validasi semua field
+                if (nim.isEmpty() || nama.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(RegisterPanel.this, "Semua field harus diisi.", "Registration Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (!password.equals(confirmPassword)) {
-                    JOptionPane.showMessageDialog(RegisterPanel.this,
-                            "Passwords do not match.",
-                            "Registration Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(RegisterPanel.this, "Passwords do not match.", "Registration Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // Attempt registration via MainPanel
-                boolean success = mainPanel.registerUser(username, password);
-                if (success) {
-                    JOptionPane.showMessageDialog(RegisterPanel.this,
-                            "Registration successful! Please login.",
-                            "Registration Success", JOptionPane.INFORMATION_MESSAGE);
+                // MODIFIKASI: Panggil metode registrasi yang baru di MainPanel
+                String result = mainPanel.registerMahasiswa(nim, nama, username, password);
+
+                if (result.equals("SUCCESS")) {
+                    JOptionPane.showMessageDialog(RegisterPanel.this, "Registrasi berhasil!", "Registration Success", JOptionPane.INFORMATION_MESSAGE);
+                    // Kosongkan field setelah berhasil
+                    tfNIM.setText("");
+                    tfNama.setText("");
                     tfUsername.setText("");
                     pfPassword.setText("");
                     pfConfirmPassword.setText("");
-                    mainPanel.showPage("login");
+                    // Navigasi akan diurus oleh MainPanel
                 } else {
-                    JOptionPane.showMessageDialog(RegisterPanel.this,
-                            "Username already exists.",
-                            "Registration Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(RegisterPanel.this, result, "Registration Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
