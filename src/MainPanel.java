@@ -1,13 +1,22 @@
 import javax.swing.*;
 import java.awt.*;
-import java.io.*; // Import untuk operasi file
+import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Arrays; // Untuk Arrays.asList jika diperlukan untuk debugging
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 public class MainPanel extends JPanel {
+
+
     private CardLayout cardLayout;
-    public ArrayList<String[]> dataMahasiswa = new ArrayList<>(); // Student attendance data
+    // MODIFIKASI: Pisahkan data mahasiswa dengan data presensi
+    public ArrayList<String[]> dataSemuaMahasiswa = new ArrayList<>(); // [NIM, Nama, TanggalDaftar]
+    public ArrayList<String[]> dataPresensi = new ArrayList<>(); // [NIM, Tanggal, Status]
+
     private HashMap<String, User> registeredUsers = new HashMap<>();
 
     private LoginPanel loginPanel;
@@ -16,8 +25,9 @@ public class MainPanel extends JPanel {
     private PresensiPanel presensiPanel;
     private StudentViewPanel studentViewPanel;
 
-    // Nama file CSV untuk menyimpan data mahasiswa
+    // MODIFIKASI: Nama file CSV dipisahkan
     private static final String DATA_MAHASISWA_CSV_FILE = "datamahasiswa.csv";
+    private static final String DATA_PRESENSI_CSV_FILE = "presensi.csv";
 
     public MainPanel() {
         registeredUsers.put("admin", new User("admin", "123")); // Default admin
@@ -26,15 +36,18 @@ public class MainPanel extends JPanel {
         setLayout(cardLayout);
         setBackground(Theme.BACKGROUND_DARK);
 
-        // PENTING: Muat data mahasiswa dari CSV saat aplikasi dimulai
+        // MODIFIKASI: Muat kedua jenis data dari CSV
         loadDataMahasiswaFromCSV();
+        loadDataPresensiFromCSV();
 
         loginPanel = new LoginPanel(this);
         registerPanel = new RegisterPanel(this);
-        // Pastikan dataMahasiswa yang sudah di-load dari CSV diteruskan ke Dashboard dan PresensiPanel
-        dashboardPanel = new Dashboard(this, dataMahasiswa);
-        presensiPanel = new PresensiPanel(this, dataMahasiswa);
-        studentViewPanel = new StudentViewPanel(this, dataMahasiswa);
+        // MODIFIKASI: Teruskan kedua list data ke panel yang memerlukan
+        dashboardPanel = new Dashboard(this, dataSemuaMahasiswa, dataPresensi);
+        presensiPanel = new PresensiPanel(this, dataSemuaMahasiswa, dataPresensi);
+        // StudentViewPanel sekarang juga butuh data presensi
+        studentViewPanel = new StudentViewPanel(this, dataSemuaMahasiswa, dataPresensi);
+
 
         add(loginPanel, "login");
         add(registerPanel, "register");
@@ -45,16 +58,6 @@ public class MainPanel extends JPanel {
         cardLayout.show(this, "login");
     }
 
-    public void showPage(String name) {
-        if (name.equals("presensi")) {
-            presensiPanel.refreshTable();
-        } else if (name.equals("dashboard")) {
-            dashboardPanel.refreshDashboardTable();
-        } else if (name.equals("studentView")) { // <-- Tambahkan kondisi untuk studentView
-            studentViewPanel.refreshView();
-        }
-        cardLayout.show(this, name);
-    }
 
     public boolean authenticateUser(String username, String password) {
         User user = registeredUsers.get(username);
@@ -66,59 +69,117 @@ public class MainPanel extends JPanel {
             return false;
         }
         registeredUsers.put(username, new User(username, password));
-        // Anda mungkin juga ingin menyimpan data pengguna ke file terpisah jika diperlukan
         return true;
     }
 
-    // --- Metode untuk Operasi CSV Data Mahasiswa ---
+    // --- Metode untuk Operasi CSV ---
 
+    // MODIFIKASI: Hanya memuat data dasar mahasiswa
     private void loadDataMahasiswaFromCSV() {
         File file = new File(DATA_MAHASISWA_CSV_FILE);
         if (!file.exists()) {
-            System.out.println("File " + DATA_MAHASISWA_CSV_FILE + " tidak ditemukan, akan dibuat saat ada data baru.");
-            return; // Tidak ada data untuk dimuat jika file tidak ada
+            System.out.println("File " + DATA_MAHASISWA_CSV_FILE + " tidak ditemukan.");
+            return;
         }
-
-        dataMahasiswa.clear(); // Kosongkan list sebelum memuat data baru
+        dataSemuaMahasiswa.clear();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                // Split berdasarkan koma, tapi hati-hati jika ada koma di dalam data itu sendiri
-                // Untuk kasus sederhana, ini cukup. Untuk kasus kompleks, gunakan library CSV.
-                String[] data = line.split(",", -1); // -1 agar tidak membuang empty string di akhir
-                if (data.length == 4) { // Pastikan formatnya NIM, Nama, Tanggal, Status
-                    dataMahasiswa.add(data);
-                } else {
-                    System.err.println("Baris data tidak valid di CSV: " + line + " (Jumlah kolom: " + data.length + ")");
+                String[] data = line.split(",", -1);
+                if (data.length == 3) { // NIM, Nama, TanggalDaftar
+                    dataSemuaMahasiswa.add(data);
                 }
             }
-            System.out.println("Data mahasiswa berhasil dimuat dari " + DATA_MAHASISWA_CSV_FILE);
+            System.out.println("Data mahasiswa berhasil dimuat.");
         } catch (IOException e) {
             System.err.println("Error saat memuat data mahasiswa dari CSV: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
+    // BARU: Metode untuk memuat data presensi
+    private void loadDataPresensiFromCSV() {
+        File file = new File(DATA_PRESENSI_CSV_FILE);
+        if (!file.exists()) {
+            System.out.println("File " + DATA_PRESENSI_CSV_FILE + " tidak ditemukan.");
+            return;
+        }
+        dataPresensi.clear();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",", -1);
+                if (data.length == 3) { // NIM, Tanggal, Status
+                    dataPresensi.add(data);
+                }
+            }
+            System.out.println("Data presensi berhasil dimuat.");
+        } catch (IOException e) {
+            System.err.println("Error saat memuat data presensi dari CSV: " + e.getMessage());
+        }
+    }
+
+    // MODIFIKASI: Hanya menyimpan data dasar mahasiswa
     public void saveDataMahasiswaToCSV() {
-        // Menggunakan try-with-resources untuk memastikan PrintWriter ditutup secara otomatis
-        try (PrintWriter writer = new PrintWriter(new FileWriter(DATA_MAHASISWA_CSV_FILE, false))) { // false untuk menimpa file
-            for (String[] data : dataMahasiswa) {
-                // Gabungkan array String menjadi satu string dengan pemisah koma
-                // String.join aman untuk kasus di mana data tidak mengandung koma
+        try (PrintWriter writer = new PrintWriter(new FileWriter(DATA_MAHASISWA_CSV_FILE, false))) {
+            for (String[] data : dataSemuaMahasiswa) {
                 writer.println(String.join(",", data));
             }
-            System.out.println("Data mahasiswa berhasil disimpan ke " + DATA_MAHASISWA_CSV_FILE);
+            System.out.println("Data mahasiswa berhasil disimpan.");
         } catch (IOException e) {
             System.err.println("Error saat menyimpan data mahasiswa ke CSV: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
-    /**
-     * Metode ini bisa dipanggil dari Dashboard atau PresensiPanel
-     * setiap kali ada perubahan pada dataMahasiswa yang perlu disimpan.
-     */
-    public void notifyDataMahasiswaChanged() {
-        saveDataMahasiswaToCSV();
+    // BARU: Metode untuk menyimpan data presensi
+    public void saveDataPresensiToCSV() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(DATA_PRESENSI_CSV_FILE, false))) {
+            for (String[] data : dataPresensi) {
+                writer.println(String.join(",", data));
+            }
+            System.out.println("Data presensi berhasil disimpan.");
+        } catch (IOException e) {
+            System.err.println("Error saat menyimpan data presensi ke CSV: " + e.getMessage());
+        }
     }
+
+    // BARU: Metode untuk memperbarui atau menambahkan data presensi
+    public void updatePresensi(String nim, LocalDate date, String status) {
+        String dateString = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        boolean found = false;
+        // Cari jika sudah ada data presensi untuk nim dan tanggal tsb
+        for (String[] presensi : dataPresensi) {
+            if (presensi[0].equals(nim) && presensi[1].equals(dateString)) {
+                presensi[2] = status; // Update status
+                found = true;
+                break;
+            }
+        }
+        // Jika tidak ditemukan, tambahkan data baru
+        if (!found) {
+            dataPresensi.add(new String[]{nim, dateString, status});
+        }
+        // Simpan perubahan ke CSV
+        saveDataPresensiToCSV();
+    }
+
+    // BARU: Mendapatkan status presensi untuk tanggal tertentu dalam bentuk Map
+    public Map<String, String> getPresensiForDate(LocalDate date) {
+        String dateString = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        return dataPresensi.stream()
+                .filter(p -> p[1].equals(dateString))
+                .collect(Collectors.toMap(p -> p[0], p -> p[2]));
+    }
+    public void showPage(String name) {
+        if (name.equals("presensi")) {
+            // MODIFIKASI: Panggil metode resetToToday agar tampilan selalu fresh
+            presensiPanel.resetToToday();
+        } else if (name.equals("dashboard")) {
+            dashboardPanel.refreshDashboardView(LocalDate.now());
+        } else if (name.equals("studentView")) {
+            studentViewPanel.refreshView();
+        }
+        cardLayout.show(this, name);
+    }
+
+
 }
