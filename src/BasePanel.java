@@ -7,7 +7,6 @@ public abstract class BasePanel extends JPanel {
 
     public BasePanel(MainPanel mainPanel) {
         this.mainPanel = mainPanel;
-
         // Pengaturan umum yang ada di setiap panel, sekarang cukup ditulis sekali di sini.
         setBackground(Theme.BACKGROUND_DARK);
         setLayout(null);

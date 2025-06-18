@@ -14,8 +14,6 @@ public class RegisterPanel extends BasePanel {
 
     public RegisterPanel(MainPanel mainPanel) {
         super(mainPanel);
-        setBackground(Theme.BACKGROUND_DARK);
-        setLayout(null);
 
         int centerX = 700 / 2;
         int currentY = 80; // Sesuaikan posisi awal

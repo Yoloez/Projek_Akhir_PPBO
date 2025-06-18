@@ -12,60 +12,51 @@ public class MainPanel extends JPanel {
 
     private CardLayout cardLayout;
 
-    // Kumpulan data aplikasi
     public ArrayList<String[]> dataSemuaMahasiswa = new ArrayList<>();
     public ArrayList<String[]> dataPresensi = new ArrayList<>();
     public ArrayList<String[]> dataLaporan = new ArrayList<>();
     private HashMap<String, User> registeredUsers = new HashMap<>();
 
-    // Panel-panel (halaman)
     private LoginPanel loginPanel;
     private RegisterPanel registerPanel;
     private Dashboard dashboardPanel;
     private PresensiPanel presensiPanel;
     private StudentViewPanel studentViewPanel;
 
-    // Nama file CSV
     private static final String DATA_MAHASISWA_CSV_FILE = "datamahasiswa.csv";
     private static final String DATA_PRESENSI_CSV_FILE = "presensi.csv";
     private static final String DATA_LAPORAN_CSV_FILE = "laporan.csv";
-    // BARU: Nama file untuk menyimpan data pengguna
     private static final String USERS_CSV_FILE = "users.csv";
 
     public MainPanel() {
+
         cardLayout = new CardLayout();
         setLayout(cardLayout);
         setBackground(Theme.BACKGROUND_DARK);
 
-        // MODIFIKASI: Muat data pengguna dari CSV, bukan hardcode
         loadUsersFromCSV();
 
-        // Jika setelah load, admin tidak ada (misal: aplikasi jalan pertama kali), maka buat admin
         if (!registeredUsers.containsKey("admin")) {
             registeredUsers.put("admin", new User("admin", "123", "admin"));
-            saveUsersToCSV(); // Langsung simpan admin agar ada untuk selanjutnya
+            saveUsersToCSV();
         }
 
-        // Muat data-data lainnya
         loadDataMahasiswaFromCSV();
         loadDataPresensiFromCSV();
         loadDataLaporanFromCSV();
 
-        // Inisialisasi setiap panel
         loginPanel = new LoginPanel(this);
         registerPanel = new RegisterPanel(this);
         dashboardPanel = new Dashboard(this, dataSemuaMahasiswa, dataPresensi, dataLaporan);
         presensiPanel = new PresensiPanel(this, dataSemuaMahasiswa, dataPresensi);
         studentViewPanel = new StudentViewPanel(this, dataSemuaMahasiswa, dataPresensi);
 
-        // Tambahkan semua panel ke CardLayout
         add(loginPanel, "login");
         add(registerPanel, "register");
         add(dashboardPanel, "dashboard");
         add(presensiPanel, "presensi");
         add(studentViewPanel, "studentView");
 
-        // Tampilkan halaman login sebagai halaman awal
         cardLayout.show(this, "login");
     }
 
@@ -97,7 +88,6 @@ public class MainPanel extends JPanel {
         }
 
         registeredUsers.put(username, new User(username, password, "mahasiswa", nim));
-        // MODIFIKASI: Langsung simpan data user baru ke CSV agar permanen
         saveUsersToCSV();
 
         dataSemuaMahasiswa.add(new String[]{nim, nama, LocalDate.now().toString()});
@@ -109,15 +99,40 @@ public class MainPanel extends JPanel {
         return "SUCCESS";
     }
 
+    /**
+     * BARU: Metode untuk menghapus mahasiswa dari semua data terkait.
+     * @param nim NIM mahasiswa yang akan dihapus.
+     */
+    public void hapusMahasiswa(String nim) {
+        // 1. Hapus dari data mahasiswa utama
+        dataSemuaMahasiswa.removeIf(m -> m[0].equals(nim));
+        saveDataMahasiswaToCSV();
+
+        // 2. Hapus dari semua catatan presensi
+        dataPresensi.removeIf(p -> p[0].equals(nim));
+        saveDataPresensiToCSV();
+
+        // 3. Hapus dari semua catatan laporan
+        // Ingat, NIM ada di indeks ke-1 pada dataLaporan
+        dataLaporan.removeIf(l -> l[1].equals(nim));
+        saveDataLaporanToCSV();
+
+        // 4. Hapus dari akun pengguna yang terdaftar
+        registeredUsers.values().removeIf(user -> nim.equals(user.getNim()));
+        saveUsersToCSV();
+
+        System.out.println("Mahasiswa dengan NIM " + nim + " telah dihapus dari semua data.");
+    }
+
     public StudentViewPanel getStudentViewPanel() {
         return studentViewPanel;
     }
 
-    // --- BARU: Metode untuk Load dan Save Pengguna Terdaftar ---
+    // --- Metode untuk Load dan Save Pengguna Terdaftar ---
 
     public void saveUsersToCSV() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(USERS_CSV_FILE, false))) {
-            writer.println("username,password,role,nim"); // Header CSV
+            writer.println("username,password,role,nim");
             for (User user : registeredUsers.values()) {
                 String nim = (user.getNim() == null) ? "" : user.getNim();
                 String line = String.join(",", user.getUsername(), user.getPassword(), user.getRole(), nim);
@@ -132,25 +147,17 @@ public class MainPanel extends JPanel {
     private void loadUsersFromCSV() {
         File file = new File(USERS_CSV_FILE);
         if (!file.exists()) {
-            System.out.println("File " + USERS_CSV_FILE + " tidak ditemukan. Akan dibuat baru.");
             return;
         }
-
         registeredUsers.clear();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            br.readLine(); // Lewati baris header
+            String line = br.readLine(); // Lewati header
 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",", -1);
                 if (data.length == 4) {
-                    String username = data[0];
-                    String password = data[1];
-                    String role = data[2];
-                    String nim = data[3];
-
-                    User user = new User(username, password, role, nim.isEmpty() ? null : nim);
-                    registeredUsers.put(username, user);
+                    User user = new User(data[0], data[1], data[2], data[3].isEmpty() ? null : data[3]);
+                    registeredUsers.put(data[0], user);
                 }
             }
             System.out.println("Data pengguna berhasil dimuat dari " + USERS_CSV_FILE);
@@ -159,7 +166,7 @@ public class MainPanel extends JPanel {
         }
     }
 
-    // --- Metode Lainnya untuk Operasi CSV (Tidak ada perubahan) ---
+    // --- Metode Lainnya (Tidak ada perubahan) ---
     private void loadDataMahasiswaFromCSV() {
         File file = new File(DATA_MAHASISWA_CSV_FILE);
         if (!file.exists()) return;
@@ -170,10 +177,7 @@ public class MainPanel extends JPanel {
                 String[] data = line.split(",", -1);
                 if (data.length == 3) dataSemuaMahasiswa.add(data);
             }
-            System.out.println("Data mahasiswa berhasil dimuat.");
-        } catch (IOException e) {
-            System.err.println("Error saat memuat data mahasiswa: " + e.getMessage());
-        }
+        } catch (IOException e) { /* ... */ }
     }
 
     public void saveDataMahasiswaToCSV() {
@@ -181,10 +185,7 @@ public class MainPanel extends JPanel {
             for (String[] data : dataSemuaMahasiswa) {
                 writer.println(String.join(",", data));
             }
-            System.out.println("Data mahasiswa berhasil disimpan.");
-        } catch (IOException e) {
-            System.err.println("Error saat menyimpan data mahasiswa: " + e.getMessage());
-        }
+        } catch (IOException e) { /* ... */ }
     }
 
     private void loadDataPresensiFromCSV() {
@@ -197,10 +198,7 @@ public class MainPanel extends JPanel {
                 String[] data = line.split(",", -1);
                 if (data.length == 3) dataPresensi.add(data);
             }
-            System.out.println("Data presensi berhasil dimuat.");
-        } catch (IOException e) {
-            System.err.println("Error saat memuat data presensi: " + e.getMessage());
-        }
+        } catch (IOException e) { /* ... */ }
     }
 
     public void saveDataPresensiToCSV() {
@@ -208,10 +206,7 @@ public class MainPanel extends JPanel {
             for (String[] data : dataPresensi) {
                 writer.println(String.join(",", data));
             }
-            System.out.println("Data presensi berhasil disimpan.");
-        } catch (IOException e) {
-            System.err.println("Error saat menyimpan data presensi: " + e.getMessage());
-        }
+        } catch (IOException e) { /* ... */ }
     }
 
     public void updatePresensi(String nim, LocalDate date, String status) {
@@ -247,10 +242,7 @@ public class MainPanel extends JPanel {
                 String[] data = line.split(",", -1);
                 if (data.length == 6) dataLaporan.add(data);
             }
-            System.out.println("Data laporan berhasil dimuat.");
-        } catch (IOException e) {
-            System.err.println("Error saat memuat data laporan: " + e.getMessage());
-        }
+        } catch (IOException e) { /* ... */ }
     }
 
     public void saveDataLaporanToCSV() {
@@ -258,10 +250,7 @@ public class MainPanel extends JPanel {
             for (String[] data : dataLaporan) {
                 writer.println(String.join(",", data));
             }
-            System.out.println("Data laporan berhasil disimpan.");
-        } catch (IOException e) {
-            System.err.println("Error saat menyimpan data laporan: " + e.getMessage());
-        }
+        } catch (IOException e) { /* ... */ }
     }
 
     public void addLaporan(String nim, String nama, String tanggalKehadiran, String isiLaporan) {

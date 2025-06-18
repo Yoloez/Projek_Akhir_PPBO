@@ -6,7 +6,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class Dashboard extends JPanel {
+public class Dashboard extends BasePanel {
     // Komponen UI utama
     private JTextField tfNIM, tfNama;
     private JTextField tfTanggalDisplay;
@@ -24,13 +24,10 @@ public class Dashboard extends JPanel {
     private ArrayList<String[]> dataLaporan;
 
     public Dashboard(MainPanel mainPanel, ArrayList<String[]> dataSemuaMahasiswa, ArrayList<String[]> dataPresensi, ArrayList<String[]> dataLaporan) {
-        this.mainPanel = mainPanel;
+        super(mainPanel);
         this.dataSemuaMahasiswa = dataSemuaMahasiswa;
         this.dataPresensi = dataPresensi;
         this.dataLaporan = dataLaporan;
-
-        setBackground(Theme.BACKGROUND_DARK);
-        setLayout(null);
 
         // --- UI Input Mahasiswa Baru ---
         JPanel panelMahasiswa = new JPanel(null);
@@ -178,7 +175,7 @@ public class Dashboard extends JPanel {
         updateLaporanButton();
     }
 
-    // BARU: Metode untuk update tampilan tombol laporan
+    // Metode untuk update tampilan tombol laporan
     private void updateLaporanButton() {
         boolean adaLaporanBaru = dataLaporan.stream().anyMatch(l -> l[5].equalsIgnoreCase("Baru"));
         if (adaLaporanBaru) {

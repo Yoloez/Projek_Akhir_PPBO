@@ -18,6 +18,7 @@ public class PresensiPanel extends BasePanel {
     private JButton btnPilihTanggal;
     private JButton btnChecklist;
     private JButton btnChecklistAbsen;
+    private JButton btnHapusMahasiswa;
 
     public PresensiPanel(MainPanel mainPanel, ArrayList<String[]> dataSemuaMahasiswa, ArrayList<String[]> dataPresensi) {
         super(mainPanel); // Memanggil constructor parent (BasePanel)
@@ -66,6 +67,12 @@ public class PresensiPanel extends BasePanel {
         Theme.applyButtonStyles(btnChecklist);
         add(btnChecklist);
 
+        btnHapusMahasiswa = new JButton("Hapus Mahasiswa");
+        btnHapusMahasiswa.setBounds(480, 450, 160, 30); // Atur posisi di sebelah kanan
+        Theme.applyButtonStyles(btnHapusMahasiswa);
+        btnHapusMahasiswa.setBackground(new Color(0xDC3545)); // Warna merah untuk tombol hapus
+        add(btnHapusMahasiswa);
+
         btnChecklistAbsen = new JButton("Tandai Tidak Hadir");
         btnChecklistAbsen.setBounds(350, 350, 180, 35);
         Theme.applyButtonStyles(btnChecklistAbsen);
@@ -91,6 +98,34 @@ public class PresensiPanel extends BasePanel {
         btnChecklist.addActionListener(e -> updateStatus("Hadir"));
         btnChecklistAbsen.addActionListener(e -> updateStatus("Tidak Hadir"));
         btnKembali.addActionListener(e -> mainPanel.showPage("dashboard"));
+
+        btnHapusMahasiswa.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow != -1) {
+                // Ambil NIM dari kolom pertama (indeks 0) di baris yang dipilih
+                String nim = (String) model.getValueAt(selectedRow, 0);
+                String nama = (String) model.getValueAt(selectedRow, 1);
+
+                // Tampilkan dialog konfirmasi
+                int response = JOptionPane.showConfirmDialog(
+                        this,
+                        "Apakah Anda yakin ingin menghapus mahasiswa ini?\nNIM: " + nim + "\nNama: " + nama + "\n\n(Tindakan ini tidak bisa dibatalkan)",
+                        "Konfirmasi Hapus Mahasiswa",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                // Jika admin menekan "Yes"
+                if (response == JOptionPane.YES_OPTION) {
+                    // Panggil metode hapus di MainPanel
+                    mainPanel.hapusMahasiswa(nim);
+                    // Segarkan tabel untuk menampilkan data terbaru
+                    refreshTable();
+                    JOptionPane.showMessageDialog(this, "Mahasiswa berhasil dihapus.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Pilih mahasiswa yang ingin dihapus dari tabel.", "Info", JOptionPane.INFORMATION_MESSAGE);
+         }});
 
         refreshTable();
     }
