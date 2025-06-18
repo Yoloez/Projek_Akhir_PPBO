@@ -2,15 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class LoginPanel extends JPanel {
+public class LoginPanel extends BasePanel {
     private JTextField tfUser;
     private JPasswordField tfPass;
     private MainPanel mainPanel;
 
     public LoginPanel(MainPanel mainPanel) {
-        this.mainPanel = mainPanel;
-        setBackground(Theme.BACKGROUND_DARK);
-        setLayout(null);
+        super(mainPanel);
 
         int centerX = 700 / 2;
 

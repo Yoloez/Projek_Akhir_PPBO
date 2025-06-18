@@ -3,7 +3,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class RegisterPanel extends JPanel {
+public class RegisterPanel extends BasePanel {
     // BARU: Tambahkan field untuk NIM dan Nama
     private JTextField tfNIM;
     private JTextField tfNama;
@@ -13,7 +13,7 @@ public class RegisterPanel extends JPanel {
     private MainPanel mainPanel;
 
     public RegisterPanel(MainPanel mainPanel) {
-        this.mainPanel = mainPanel;
+        super(mainPanel);
         setBackground(Theme.BACKGROUND_DARK);
         setLayout(null);
 
